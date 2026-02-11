@@ -1,0 +1,57 @@
+services:
+  # Tailscale sidecar for Seafile
+  seafile-ts:
+    image: tailscale/tailscale:latest
+    container_name: seafile_ts
+    hostname: seafile
+    environment:
+      - TS_AUTHKEY=tskey-auth-kV1zH3KGkN11CNTRL-gVnfeD77oEf45P9xsywJEfQugXm2mcoUH
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      - TS_SERVE_CONFIG=/config/serve.json
+    volumes:
+      - ./tailscale/config:/config
+      - ./tailscale/seafile:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    restart: unless-stopped
+
+  db:
+    image: mariadb:10.11
+    container_name: seafile-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=boysuper123
+      - MYSQL_LOG_CONSOLE=true
+      - MARIADB_AUTO_UPGRADE=1
+    volumes:
+      - /srv/data/seafile/seafile-mysql/db:/var/lib/mysql
+    restart: unless-stopped
+
+  memcached:
+    image: memcached:1.6.18
+    container_name: seafile-memcached
+    entrypoint: memcached -m 256
+    restart: unless-stopped
+
+  seafile:
+    image: seafileltd/seafile-mc:11.0-latest
+    container_name: seafile
+    network_mode: "service:seafile-ts"
+    volumes:
+      - /srv/data/seafile/seafile-data:/shared
+    environment:
+      - DB_HOST=db
+      - DB_ROOT_PASSWD=boysuper123
+      - TIME_ZONE=America/New_York
+      - SEAFILE_ADMIN_EMAIL=nahushvatsa@gmail.com
+      - SEAFILE_ADMIN_PASSWORD=boysuper123
+      - SEAFILE_SERVER_LETSENCRYPT=false
+      - SEAFILE_SERVER_HOSTNAME=seafile.ide-searobin.ts.net
+    depends_on:
+      - db
+      - memcached
+      - seafile-ts
+
+networks: {}

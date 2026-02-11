@@ -1,0 +1,161 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=adQMOu+3hA3ZoBeEeHTE60Aa8IRncOxCEcKKBntAODM=
+      - SERVER_COUNTRIES=United States
+    volumes:
+      - ./gluetun:/gluetun
+    restart: unless-stopped
+    networks:
+      - proxy
+  # DOWNLOADER (qBittorrent)
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    depends_on:
+      - gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - WEBUI_PORT=8080
+    volumes:
+      - ./config/qbittorrent:/config
+      - ./downloads:/downloads
+    ports:
+      - 8081:8080     # qBittorrent WebUI
+    restart: unless-stopped
+
+  # MOVIES
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    depends_on:
+      - qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./config/radarr:/config
+      - ./downloads:/downloads
+      - ./media/movies:/movies
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+    networks:
+      - proxy
+
+  # TV SHOWS
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    depends_on:
+      - qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./config/sonarr:/config
+      - ./downloads:/downloads
+      - ./media/shows:/tv
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+    networks:
+      - proxy
+
+  # PROWLARR
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./config/prowlarr:/config
+    restart: unless-stopped
+
+  # BAZARR (subtitles)
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    depends_on:
+      - sonarr
+      - radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./config/bazarr:/config
+      - ./media/movies:/movies
+      - ./media/shows:/tv
+    ports:
+      - 6767:6767
+    restart: unless-stopped
+    networks:
+      - proxy
+
+  # Flare solver
+  flaresolverr:
+    image: flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+    environment:
+      - TZ=Etc/UTC
+    restart: unless-stopped
+
+  # JELLYFIN SERVER
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./config/jellyfin:/config
+      - ./media/movies:/movies
+      - ./media/shows:/tv
+    ports:
+      - 8096:8096
+    restart: unless-stopped
+    networks:
+      - proxy
+
+  rdtclient:
+    image: rogerfar/rdtclient:latest
+    container_name: rdtclient
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./config/rdtclient:/data/db
+      - ./downloads:/data/downloads
+    ports:
+      - 6500:6500
+    restart: unless-stopped
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
+

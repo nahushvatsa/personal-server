@@ -1,0 +1,17 @@
+# secrets / local state
+.env
+.env.*
+*.key
+*.pem
+*secret*
+*password*
+*token*
+
+# docker / app state (shouldn't be here anyway)
+**/data/
+**/config/
+**/cache/
+**/logs/
+**/db/
+**/backups/
+**/media/

@@ -1,0 +1,36 @@
+home.ide-searobin.ts.net {
+    tls /ts-certs/home.ide-searobin.ts.net.crt /ts-certs/home.ide-searobin.ts.net.key
+
+    handle /vault* {
+        reverse_proxy vaultwarden:80
+    }
+
+    handle /sonarr* {
+        reverse_proxy sonarr:8989
+    }
+
+    handle /radarr* {
+        reverse_proxy radarr:7878
+    }
+
+    handle /prowlarr* {
+        reverse_proxy gluetun:9696
+    }
+
+    handle /bazarr* {
+        reverse_proxy bazarr:6767
+    }
+
+    handle /decypharr* {
+        reverse_proxy decypharr:8282
+    }
+
+    handle /jellyfin* {
+        reverse_proxy jellyfin:8096
+    }
+
+    handle /plex* {
+        reverse_proxy plex:32400
+    }
+}
+
