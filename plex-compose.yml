@@ -1,0 +1,19 @@
+  # PLEX SERVER
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - VERSION=docker
+      - ALLOWED_NETWORKS=192.168.1.0/24,100.64.0.0/10
+      - ADVERTISE_IP=http://192.168.1.206:32400,http://100.120.60.61:32400,http://home.ide-searobin.ts.net:32400
+      - PLEX_CLAIM=claim-ukWLS4JMKEXRFXh17FQ_
+    volumes:
+      - ./plex/plex-config:/config
+      - ./media/movies:/movies
+      - ./media/shows:/tv
+      - ./plex/transcode:/transcode
+    restart: unless-stopped
