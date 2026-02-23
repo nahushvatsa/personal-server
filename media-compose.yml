@@ -9,7 +9,7 @@ services:
     environment:
       - VPN_SERVICE_PROVIDER=nordvpn
       - VPN_TYPE=wireguard
-      - WIREGUARD_PRIVATE_KEY=adQMOu+3hA3ZoBeEeHTE60Aa8IRncOxCEcKKBntAODM=
+      - WIREGUARD_PRIVATE_KEY=WIREGUARD_KEY
       - SERVER_COUNTRIES=United States
     volumes:
       - ./gluetun:/gluetun

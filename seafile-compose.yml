@@ -5,7 +5,7 @@ services:
     container_name: seafile_ts
     hostname: seafile
     environment:
-      - TS_AUTHKEY=tskey-auth-kV1zH3KGkN11CNTRL-gVnfeD77oEf45P9xsywJEfQugXm2mcoUH
+      - TS_AUTHKEY=${TS_KEY}
       - TS_STATE_DIR=/var/lib/tailscale
       - TS_USERSPACE=false
       - TS_SERVE_CONFIG=/config/serve.json
@@ -22,7 +22,7 @@ services:
     image: mariadb:10.11
     container_name: seafile-mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=boysuper123
+      - MYSQL_ROOT_PASSWORD=${ADMIN_PWD}
       - MYSQL_LOG_CONSOLE=true
       - MARIADB_AUTO_UPGRADE=1
     volumes:
@@ -45,8 +45,8 @@ services:
       - DB_HOST=db
       - DB_ROOT_PASSWD=boysuper123
       - TIME_ZONE=America/New_York
-      - SEAFILE_ADMIN_EMAIL=nahushvatsa@gmail.com
-      - SEAFILE_ADMIN_PASSWORD=boysuper123
+      - SEAFILE_ADMIN_EMAIL=${ADMIN_EMAIL}
+      - SEAFILE_ADMIN_PASSWORD=${ADMIN_PWD}
       - SEAFILE_SERVER_LETSENCRYPT=false
       - SEAFILE_SERVER_HOSTNAME=seafile.ide-searobin.ts.net
     depends_on:
